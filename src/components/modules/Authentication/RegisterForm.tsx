@@ -3,10 +3,12 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { useForm } from "react-hook-form";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { z } from "zod";
 import { zodResolver } from '@hookform/resolvers/zod';
 import Password from "@/components/ui/Password";
+import { useRegisterMutation } from "@/redux/features/auth/auth.api";
+import { toast } from "sonner";
 
 const registerSchema = z.object({
     name: z.string().min(3, {
@@ -24,10 +26,9 @@ const registerSchema = z.object({
     path: ['confirmPassword'] // most important hocce path ta bole dewa
 })
 
-export function RegisterForm({
-    className,
-    ...props
-}: React.HTMLAttributes<HTMLDivElement>) {
+export function RegisterForm({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+    const [register] = useRegisterMutation();
+    const navigate = useNavigate();
     const form = useForm<z.infer<typeof registerSchema>>({
         resolver: zodResolver(registerSchema),
         defaultValues: {
@@ -37,8 +38,20 @@ export function RegisterForm({
             confirmPassword: ""
         }
     });
-    const onSubmit = (data: z.infer<typeof registerSchema>) => {
-        console.log(data);
+    const onSubmit = async (data: z.infer<typeof registerSchema>) => {
+        const userInfo = {
+            name: data.name,
+            email: data.email,
+            password: data.password
+        };
+        try {
+            const result = await register(userInfo).unwrap();
+            console.log(result);
+            toast.success("Registration successful");
+            navigate('/verify');
+        } catch (error) {
+            console.error(error);
+        }
     }
 
     return (
