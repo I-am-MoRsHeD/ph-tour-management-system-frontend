@@ -17,19 +17,20 @@ export function LoginForm({
   const form = useForm();
 
   const onSubmit: SubmitHandler<FieldValues> = async (data) => {
+    const toastId = toast.loading('Please wait!');
     try {
       const res = await login(data).unwrap();
       if (res.statusCode === 200) {
-        toast.success(res.message);
+        toast.success(res.message, { id: toastId });
         navigate("/");
       }
     } catch (err: any) {
       console.error(err);
       if (err.status === 400) {
-        toast.error(err.data.message);
+        toast.error(err.data.message, { id: toastId });
       }
       if (err.status === 401) {
-        toast.error(err.data.message);
+        toast.error(err.data.message, { id: toastId });
         navigate("/verify", { state: data.email });
       }
     }
