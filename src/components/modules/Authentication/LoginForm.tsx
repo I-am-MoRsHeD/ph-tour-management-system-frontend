@@ -2,6 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import config from "@/config";
 import { cn } from "@/lib/utils";
 import { useLoginMutation } from "@/redux/features/auth/auth.api";
 import { useForm, type FieldValues, type SubmitHandler } from "react-hook-form";
@@ -22,7 +23,13 @@ export function LoginForm({
       const res = await login(data).unwrap();
       if (res.statusCode === 200) {
         toast.success(res.message, { id: toastId });
-        navigate("/");
+        if (res.data?.user?.role === 'USER') {
+          navigate("/user/bookings");
+        } else if (res.data?.user?.role === 'ADMIN' || res.data?.user?.role === 'SUPER_ADMIN') {
+          navigate('/admin/analytics')
+        } else {
+          navigate('/');
+        }
       }
     } catch (err: any) {
       console.error(err);
@@ -99,6 +106,7 @@ export function LoginForm({
           type="button"
           variant="outline"
           className="w-full cursor-pointer"
+          onClick={() => window.open(`${config.baseUrl}/auth/google`)}
         >
           Login with Google
         </Button>
